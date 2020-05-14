@@ -222,6 +222,9 @@ where
             (#($#arg_names:expr),*) => {{
                 use sqlx::arguments::Arguments as _;
 
+                // lets `cargo sqlx prepare` ensure that we can always trigger a recompile
+                const _: Option<&'static str> = option_env!("__SQLX_RECOMPILE_TRIGGER");
+
                 #args_tokens
 
                 #output
@@ -231,8 +234,12 @@ where
 
     #[cfg(feature = "offline")]
     {
-        let save_dir = env::var("CARGO_TARGET_DIR").unwrap_or_else(|_| "target/sqlx".into());
-        std::fs::create_dir_all(&save_dir);
+        let mut save_dir =
+            PathBuf::from(env::var("CARGO_TARGET_DIR").unwrap_or_else(|_| "target/".into()));
+
+        save_dir.push("sqlx");
+
+        std::fs::create_dir_all(&save_dir)?;
         data.save_in(save_dir, input.src_span)?;
     }
 

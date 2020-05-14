@@ -1,5 +1,4 @@
 use sqlx::PgPool;
-use std::env;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -17,7 +16,7 @@ enum Command {
 #[async_std::main]
 #[paw::main]
 async fn main(args: Args) -> anyhow::Result<()> {
-    let mut pool = PgPool::new(&env::var("DATABASE_URL")?).await?;
+    let mut pool = PgPool::new(&dotenv::var("DATABASE_URL")?).await?;
 
     match args.cmd {
         Some(Command::Add { description }) => {
